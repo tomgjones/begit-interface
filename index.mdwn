@@ -9,6 +9,7 @@
 [[!table head=no data="""
 
 version | 0.1
+short description | create minimal but non-empty git repositories with predictable content
 
 """]]
 
