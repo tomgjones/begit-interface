@@ -1,106 +1,13 @@
 [[!tag interface_package begit]]
 
 [[!exttag subj=begit.1 manpage]]
+[[!exttag subj=mkmingit.1 manpage]]
 
 [[!toc levels=2]]
 
-# Reference
+# Description
 
-[[!table head=no data="""
-
-version | 0.1
-short description | create minimal but non-empty git repositories with predictable content
-
-"""]]
-
-[[mkgitmin.1]], [[begit.1]]
-
-# High-level requirements
-
-It should be easy to create a non-empty git repository which:
-
-- doesn't contain any identifying user or host information
-- contains the minimum number of commits
-- has an empty tree at the tip of the master branch
-- can produce two identical new git repositories in a row
-
-# Rationale
-
-Empty git repositories aren't very easy to work with.  For example,
-in the common case where you want to just `git push` to one, you
-will generate this error message:
-
-    No refs in common and none specified; doing nothing.
-
-This is because the empty repository on the server doesn't yet have
-a master branch.  The client's default behaviour is to push the
-local master to the remote master, so long as these both exist.
-
-The solution is easy but boring: you explicitly specify the branch
-to push, the first time you do it: `git push origin master`.  After
-that, you can just `git push`, as long as you're pushing the local
-master to the remote master.
-Typing these extra words is something that may grate
-on users who initialise several repositories per day.  And for
-users who only ever deal with the master branch (for example,
-those managing certain kinds of content with git), and thus
-don't really need to know about branches, the cognitive
-load of this first step is substantial.
-
-Empty repositories also used to be unclonable, but this is not the case
-with more recent versions of git.  However, you will get a warning
-if you clone an empty repository.
-
-# Background
-
-## Example: github
-
-If you start a new repository on github, it starts out empty.  They
-get around this in two ways.  Firstly, they offer to create a `README`.
-This creates a master branch and the respository is no longer empty.
-They describe this is:
-
-> Initialize this repository with a README.
-> This will allow you to git clone the repository immediately.
-
-Which I believe is a bit off, since cloning the repository shouldn't
-pose a problem (these days), so much as pushing to it.
-
-The second way github get around it is by offering up precise,
-copy-and-pastable,
-instructions for doing your first push, so that master is initialised
-on the remote end:
-
-    git remote add origin https://github.com/tomgjones/begit-interface.git
-    git push -u origin master
-
-# Design discussion
-
-## Empty tree at master tip; Minimum number of commits
-
-A person starting work with a new repository will normally want it to
-appear "empty".  That is, the master's tip should be an empty tree.
-Therefore, the minimum number of commits required appears to be two:
-one to put something in to place, and one to take it away again.
-
-## Doesn't contain any identifying user or host information
-
-An adhoc attempt at solving this problem will often result in 
-identifying information, such as the host name where it was run, 
-or the username under which it was run,
-ending up in the repository content.  The interface should guarantee
-that no such information is created in the repositories it outputs.
-
-## Can produce two identical new git repositories in a row
-
-Although not essential, there may be some benefits in terms of repeatability
-if two repositories in a row created by the same tool were to have the
-same precise git content.
-
-# Proposed interface
-
-[[mkgitmin.1]] is the more basic interface.  It simply creates a
-new minimal repository.
+[[mkgitmin.1]] creates a new minimal but non-empty repository.
 
 [[begit.1]] can be used for idempotent creation of a respository.
 It only creates a new repository if there isn't one there already,
@@ -111,19 +18,44 @@ so that the respository is created the first time the service is run,
 but no error is generated on subsequent runs, once the respository
 already exists.
 
+# Examples
+
+Create a new repository on a git server:
+
+    $ mkgitmin /srv/git/repos/foo
+
+Create a new repository, but quit without error if it already exists:
+
+    $ begit /srv/git/repos/foo
+
+Similar, but with a working copy, rather than being a bare repo:
+
+    $ mkgitmin -B ~/mystuff
+
+Create a new repository if it doesn't already exist. On creation,
+run a hypothetical
+program to alter git's `config` file:
+
+    begit -B ~/mynewrepo gitconfigapply ~/mynewrepo user.name Bill
+
+# Reference
+
+[[!table head=no data="""
+
+version | 0.1
+short description | create minimal but non-empty git repositories with predictable content
+license | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html)
+
+"""]]
+
+## Spec docs
+
+[[mkgitmin.1]], [[begit.1]]
+
 # Known implementations
 
-# Use cases
+- <https://github.com/tomgjones/begit-ri>
 
-## Git services
+# See also
 
-Providers of public or corporate git services may prefer to create
-repositories non-empty by default, perhaps with an option for power
-users to choose to create empty repositories if they really want.
-
-## Embedded git usage by applications
-
-Imagine a CMS that uses git for tracking content in various areas.  It
-checks out the respository and then renders it.  Ensuring that the
-repository is never empty ensures that the application doesn't need
-to special-case for it.
+See also [[discussion]].
