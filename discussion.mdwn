@@ -1,3 +1,5 @@
+[[!toc levels=2]]
+
 # High-level requirements
 
 It should be easy to create a non-empty git repository which:
